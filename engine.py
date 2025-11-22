@@ -19,17 +19,54 @@ class ForwardChainingEngine:
         self.facts.update(initial)
 
     def can_fire(self, rule: Rule) -> bool:
-        """TODO: Return True if all antecedents are true and consequent not yet known."""
-        pass
+        """ Return True if all antecedents are true and consequent not yet known."""
+        return(
+            all(a in self.facts for a in rule.antecedents)
+            and rule.consequent not in self.facts
+        )
 
     def run(self) -> None:
-        """TODO: Implement the forward chaining loop."""
-        # while there are rules that can fire:
-        #     select one rule (students decide tie-breaking)
-        #     add its consequent to facts
-        #     record in trace
-        pass
+        """Implement the forward chaining loop."""
+        fired = True
+        
+        while fired:
+            fired = False
+            
+            fireable =  [f for f in self.rules if self.can_fire(f)]
+            
+            if not fireable:
+                return
+            
+            rule = fireable[0]
+            
+            fired = True
+            
+            self.facts.add(rule.consequent)
+            
+            self.trace.append({
+                "rule":rule.name,
+                "added":rule.consequent,
+                "from":rule.antecedents
+            })
 
     def conclusions(self) -> Dict[str, List[str]]:
-        """TODO: Return separated results (recommendations, specs, other facts)."""
-        pass
+        """Return separated results (recommendations, specs, other facts)."""
+        recommendations = []
+        specs = []
+        other = []
+    
+        for f in self.facts:
+            if f.startswith("recommend:"):
+                recommendations.append(f)
+            elif f.startswith("spec:"):
+                specs.append(f)
+            else:
+                other.append(f)
+                
+        return {
+            "recommendations": recommendations,
+            "specs": specs,
+            "other_facts": other,
+            "trace": self.trace
+        }
+            

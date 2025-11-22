@@ -48,10 +48,30 @@ def main():
     facts = collect_initial_facts()
     
     engine = ForwardChainingEngine(load_rules(KB_PATH))
+    
     engine.assert_facts(facts)
     engine.run()
     
     conclusions = engine.conclusions()
+    
+    print("\n .......Results.......")
+    
+    if conclusions["recommendations"]:
+        for r in conclusions["recommendations"]:
+            rec_name = r.replace("recommend:", "")
+            trace_item = next(t for t in conclusions["trace"] if t["added"] == r)
+            print(f"> Recommendation: {rec_name}")
+            print(f"> Explanation: derived from rule '{trace_item['rule']}'\n")
+            
+    if conclusions["specs"]:
+        print("\n .......Recommended Specs.......")
+        for s in conclusions ["specs"]:
+            print(".", s.replace ("spec:", ""))
+            
+            
+    print("\n .......Rules Fired.......")
+    for t in conclusions ["trace"]:
+        print(f"- {t['rule']}  (added: {t['added']})")
 
 if __name__ == "__main__":
     main()
